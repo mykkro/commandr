@@ -20,8 +20,8 @@ setup(
     packages=['commandr'],
     url='',
     license='MIT',
-    author='Miroslav Uller',
-    author_email='Miroslav.Uller@cvut.cz',
+    author='Myrousz',
+    author_email='',
     description='Commandr',
     python_requires='>=3.8',
     install_requires = [
