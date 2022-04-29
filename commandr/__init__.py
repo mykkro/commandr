@@ -1,5 +1,6 @@
 import os, json, itertools, argparse, yaml, sys
 import distutils.util
+import datetime
 
 
 def load_yaml(yaml_path):
@@ -30,11 +31,13 @@ def environ_or_required(key):
 
 
 def val_to_bool(val):
-    # print("val_to_bool:", val, type(val))
     if type(val) == str:
         return bool(distutils.util.strtobool(val))
     else:
         return bool(val)
+
+def val_to_date(val, format):
+    return datetime.datetime.strptime(val, format)
 
 
 def type_by_name(name):
@@ -46,11 +49,11 @@ def type_by_name(name):
         return float
 
     # other types handle as string ...
-    return 'str'
+    return str
 
 
 class CommandrArg(object):
-    def __init__(self, name, cli, type=None, required=False, default=None, env=None, loadconfig=None, help=help):
+    def __init__(self, name, cli, type=None, required=False, default=None, env=None, loadconfig=None, help=help, format=format):
         self.name = name
         self.cli = cli
         self.type = type
@@ -59,49 +62,45 @@ class CommandrArg(object):
         self.env = env
         self.loadconfig = loadconfig
         self.help = help
+        self.format = format
 
 
 class Commandr(object):
     def __init__(self):
         self.args = []
         self.parser = None
-        # print("Commandr created!", cfg)
 
     @staticmethod
     def from_file(path):
         cfg = load_cfg(path)
         c = Commandr()
         for arg in cfg["args"]:
-            c.add_argument(arg["name"], arg["cli"], type=arg.get("type"), required=arg.get("required"), default=arg.get("default"), env=arg.get("env"), loadconfig=arg.get("loadconfig"), help=arg.get("help"))
+            c.add_argument(arg["name"], arg["cli"], type=arg.get("type"), required=arg.get("required"), default=arg.get("default"), env=arg.get("env"), loadconfig=arg.get("loadconfig"), help=arg.get("help"), format=arg.get("format"))
         c.build()
         return c
 
-    def add_argument(self, name, cli, type=None, required=False, default=None, env=None, loadconfig=None, help=None):
+    def add_argument(self, name, cli, type=None, required=False, default=None, env=None, loadconfig=None, help=None, format=None):
         if required and (default is not None):
             raise Exception(f"{name}: Required args cannot have default values!")
-        ca = CommandrArg(name, cli, type=type, required=required, default=default, env=env, loadconfig=loadconfig, help=help)
+        if type == "datetime" and (format is None):
+            raise Exception(f"{name}: Datetime fields must have format specified!")
+        ca = CommandrArg(name, cli, type=type, required=required, default=default, env=env, loadconfig=loadconfig, help=help, format=format)
         self.args.append(ca)
 
     def schema_version():
         return "1.0"
 
     def build(self):
-        # print("Building Commandr", self.cfg)
         self.parser, required, optional = Commandr.prepare_cli_args()
         for arg in self.args:
-            # print("Argument:", arg)
-            name = arg.name
             cli = arg.cli.split("|")
-            is_required = arg.required
-            help = arg.help
             type = arg.type or'str'
             basictype = type_by_name(type)
-            # handle 'bool' options differently...
-            target = required if is_required else optional
+            target = required if arg.required else optional
             if type == "switch":
-                target.add_argument(*cli, dest=name, help=help, action='store_true')
+                target.add_argument(*cli, dest=arg.name, help=arg.help, action='store_true')
             else:
-                target.add_argument(*cli, dest=name, help=help, type=basictype)
+                target.add_argument(*cli, dest=arg.name, help=arg.help, type=basictype)
         return self
 
     def parse(self, args=sys.argv[1:], verbose=False):
@@ -117,7 +116,7 @@ class Commandr(object):
                 cli_val = val_to_bool(cli_val)
             default_val = arg.default
             env_val = os.getenv(arg.env) if arg.env else None
-            if arg.type == "switch" and arg.env:
+            if arg.type in ["switch", "bool"] and arg.env:
                 env_val = val_to_bool(env_val)
             if verbose:
                 print(f"{name}:")
@@ -139,6 +138,9 @@ class Commandr(object):
                     source = "ENV"
             else:
                 source = "CLI"
+
+            if arg.type == "datetime" and used_value is not None:
+                used_value = val_to_date(used_value, arg.format)
 
             if arg.loadconfig:
                 # the value will be used as path to config file

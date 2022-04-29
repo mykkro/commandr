@@ -3,7 +3,7 @@
 Basically, it is a small convenience wrapper around argparse with some useful bits mixed in. 
 
 * uses `argparse` for parsing CLI args
-* substitutes values from ENV vars inf provided
+* substitutes values from ENV vars if provided
 * can load multiple config files (JSON, YAML) into Python dicts
 
 ## Basic Usage
@@ -18,6 +18,8 @@ cmdr.add_argument("infile", "-i", type="str", required=True)
 cmdr.add_argument("count", "-c|--count", type="int", default=12345, env="COMMANDR_COUNT")
 cmdr.add_argument("config", "--config", default="config/config.yaml", loadconfig=True)
 cmdr.add_argument("verbose", "-v|--verbose", type="switch", env="COMMANDR_VERBOSE")
+cmdr.add_argument("mybool", "--mybool", type="bool")
+cmdr.add_argument("date", "--date", type="datetime", dateformat="%Y-%m-%d")
 cmdr.build()
 
 args, configs = cmdr.parse(verbose=True)
@@ -31,5 +33,4 @@ for argname in args:
 ## TODO & Nice2Have
 
 * enhanced args validation
-* datetime parsing
 * validate JSON/YAML docs against a schema
