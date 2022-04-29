@@ -82,7 +82,7 @@ class Commandr(object):
                 target.add_argument(*cli, dest=name, help=help, type=basictype)
         return self
 
-    def parse(self):
+    def parse(self, verbose=False):
         args = self.parser.parse_args()
         args_dict = vars(args)
         out = {}
@@ -100,7 +100,9 @@ class Commandr(object):
             env_val = os.getenv(arg.get("env")) if arg.get("env") else None
             if arg.get("type") == "switch" and arg.get("env"):
                 env_val = val_to_bool(env_val)
-            # print(f"{name}: CLI({cli_val}) ENV({env_val}) DEFAULT({default_val} REQUIRED({required})")
+            if verbose:
+                print(f"{name}:")
+                print("  CLI({cli_val}) ENV({env_val}) DEFAULT({default_val} REQUIRED({required})")
 
             source = None
             used_value = cli_val
@@ -123,7 +125,8 @@ class Commandr(object):
                 # the value will be used as path to config file
                 configs[name] = load_cfg(used_value)
 
-            # print(f"{name}: source={source} value={used_value}")
+            if verbose:
+                print(f"  source={source} value={used_value}")
             out[name] = dict(source=source, value=used_value)
 
         self.validate(out)
