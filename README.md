@@ -1,8 +1,10 @@
-# commandr - utility to build command line poarsers for Python
+# commandr - utility to build command line parsers for Python
+
+Basically, it is a small convenience wrapper around argparse with some useful bits mixed in. 
 
 * uses `argparse` for parsing CLI args
 * substitutes values from ENV vars inf provided
-* can load multuiple config files into Python dicts
+* can load multiple config files (JSON, YAML) into Python dicts
 
 ## Basic Usage
 
@@ -25,3 +27,9 @@ for argname in args:
     print(f"  ({args[argname]['source']}) {argname}: {args[argname]['value']}") 
 
 ```
+
+## TODO & Nice2Have
+
+* enhanced args validation
+* datetime parsing
+* validate JSON/YAML docs against a schema
