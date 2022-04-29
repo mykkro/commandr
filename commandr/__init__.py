@@ -12,6 +12,16 @@ def load_json(path):
         data = json.load(infile)
     return data
 
+
+def load_cfg(path):
+    if path.endswith(".json"):
+        return load_json(path)
+    elif path.endswith(".yaml"):
+        return load_yaml(path)
+    else:
+        raise Exception(f"Unsupported config format: {path}")
+
+
 def environ_or_required(key):
     return (
         {'default': os.environ.get(key)} if os.environ.get(key)
@@ -46,13 +56,7 @@ class Commandr(object):
 
     @staticmethod
     def from_file(path):
-        if path.endswith(".json"):
-            cfg = load_json(path)
-        elif path.endswith(".yaml"):
-            cfg = load_yaml(path)
-        else:
-            raise Exception(f"Unsupported config format: {path}")
-        c = Commandr(cfg)
+        c = Commandr(load_cfg(path))
         c.build()
         return c
 
@@ -82,6 +86,7 @@ class Commandr(object):
         args = self.parser.parse_args()
         args_dict = vars(args)
         out = {}
+        configs = {}
         for arg in self.cfg["args"]:
             name = arg["name"]
             required = arg.get("required")
@@ -114,12 +119,16 @@ class Commandr(object):
             else:
                 source = "CLI"
 
+            if arg.get("loadconfig"):
+                # the value will be used as path to config file
+                configs[name] = load_cfg(used_value)
+
             # print(f"{name}: source={source} value={used_value}")
             out[name] = dict(source=source, value=used_value)
 
         self.validate(out)
 
-        return out
+        return out, configs
         
 
     def validate(self, out):

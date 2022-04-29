@@ -6,6 +6,7 @@ if __name__ == "__main__":
 
     print("Starting Commandr...")
 
-    cmdr = Commandr.from_file("config/demo.cmdr.yaml")
-    args = cmdr.parse()
+    cmdr = Commandr.from_file("config/demo2.cmdr.yaml")
+    args, configs = cmdr.parse()
     print("Args parsed:", args)
+    print("Configs loaded:", configs)
