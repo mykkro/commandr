@@ -1,0 +1,26 @@
+{
+        "title": "Commandr demo - simple CLI args",
+        "version": "1.0",
+        "schema_version": "1.0",
+        "args": [
+            {
+                "name": "infile",
+                "cli": "-i",
+                "type": "str",
+                "required": True
+            },
+            {
+                "name": "count",
+                "cli": "-c|--count",
+                "type": "int",
+                "default": 666,
+                "env": "COMMANDR_COUNT"
+            },
+            {
+                "name": "verbose",
+                "cli": "-v|--verbose",
+                "type": "switch",
+                "env": "COMMANDR_VERBOSE" 
+            }
+        ]
+    }
