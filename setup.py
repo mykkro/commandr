@@ -25,7 +25,8 @@ setup(
     description='Commandr',
     python_requires='>=3.8',
     install_requires = [
-        'versiontag>=1.1.1'
+        'versiontag>=1.1.1',
+        'pyyaml'
     ],
     package_data={'': ['requirements.txt', 'README.md']},
     include_package_data=True
