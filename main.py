@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 from commandr import Commandr, load_yaml
 
 
@@ -10,7 +11,7 @@ if __name__ == "__main__":
 
     print("Starting Commandr...")
 
-    cmdr = Commandr()
+    cmdr = Commandr("commandr-demo", title="Commandr Demo")
     cmdr.add_argument("infile", "-i", type="str", required=True)
     cmdr.add_argument("count", "-c|--count", type="int", default=12345, env="COMMANDR_COUNT")
     cmdr.add_argument("config", "--config", default="config/config.yaml", loadconfig=True)
@@ -26,3 +27,10 @@ if __name__ == "__main__":
         print(f"  ({args[argname]['source']}) {argname}: {args[argname]['value']}") 
 
     print("Configs loaded:", configs)
+
+    SAVEFILE = False
+    if SAVEFILE:
+        dict = cmdr.to_dict()
+        json_doc = json.dumps(dict, indent=4)
+        with open("target/commandr-demo.cmdr.json", "w", encoding="utf-8") as outfile:
+            outfile.write(json_doc)

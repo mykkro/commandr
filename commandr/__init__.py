@@ -64,11 +64,21 @@ class CommandrArg(object):
         self.help = help
         self.format = format
 
+    def to_dict(self):
+        return self.__dict__
+
 
 class Commandr(object):
-    def __init__(self):
+    def __init__(self, name, title=None, description=None):
+        self.name = name
+        self.title = title
+        self.description = description
         self.args = []
         self.parser = None
+
+    def to_dict(self):
+        # TODO add version and schemaversion
+        return dict(name=self.name, title=self.title, description=self.description, args=[a.to_dict() for a in self.args])
 
     @staticmethod
     def from_file(path):
