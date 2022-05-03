@@ -8,25 +8,34 @@ Basically, it is a small convenience wrapper around argparse with some useful bi
 
 ## Basic Usage
 
-```
+```python
 import os
 import sys
 from commandr import Commandr, load_yaml
 
-cmdr = Commandr()
-cmdr.add_argument("infile", "-i", type="str", required=True)
-cmdr.add_argument("count", "-c|--count", type="int", default=12345, env="COMMANDR_COUNT")
-cmdr.add_argument("config", "--config", default="config/config.yaml", loadconfig=True)
-cmdr.add_argument("verbose", "-v|--verbose", type="switch", env="COMMANDR_VERBOSE")
-cmdr.add_argument("mybool", "--mybool", type="bool")
-cmdr.add_argument("date", "--date", type="datetime", dateformat="%Y-%m-%d")
-cmdr.build()
+print("Starting Commandr...")
 
-args, configs = cmdr.parse(verbose=True)
+LOADFROMFILE = False
+if LOADFROMFILE:
+    cmdr = Commandr.load("target/commandr-demo.cmdr.yaml")
+else:
+    cmdr = Commandr("commandr-demo", title="Commandr Demo")
+    cmdr.add_argument("infile", "-i", type="str", required=True)
+    cmdr.add_argument("count", "-c|--count", type="int", default=12345, env="COMMANDR_COUNT")
+    cmdr.add_argument("config", "--config", default="config/config.yaml", loadconfig=True)
+    cmdr.add_argument("verbose", "-v|--verbose", type="switch", env="COMMANDR_VERBOSE")
+    cmdr.add_argument("mybool", "--mybool", type="bool")
+    cmdr.add_argument("date", "--date", type="datetime", format="%Y-%m-%d")
+
+args, configs = cmdr.parse()
 
 print("Args parsed:")
 for argname in args:
     print(f"  ({args[argname]['source']}) {argname}: {args[argname]['value']}") 
+
+print("Configs loaded:", configs)
+
+# cmdr.save("target/commandr-demo.cmdr.yaml")
 
 ```
 
