@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-from commandr import Commandr, load_yaml
+from commandr import Commandr
 
 
 if __name__ == "__main__":

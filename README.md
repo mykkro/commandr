@@ -6,6 +6,10 @@ Basically, it is a small convenience wrapper around argparse with some useful bi
 * substitutes values from ENV vars if provided
 * can load multiple config files (JSON, YAML) into Python dicts
 
+## Install
+
+This library uses a tiny library [kommons](https://github.com/mykkro/kommons). You can install `kommons` and `commandr` via `python setup.py install`.
+
 ## Basic Usage
 
 ```python
