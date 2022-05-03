@@ -2,7 +2,7 @@ import os, json, itertools, argparse, yaml, sys
 import distutils.util
 import datetime
 
-
+# TODO move this to some 'commons' library
 def load_yaml(yaml_path):
     with open(yaml_path, "r", encoding="utf-8") as infile:
         return yaml.load(infile, Loader=yaml.FullLoader)
@@ -14,11 +14,30 @@ def load_json(path):
     return data
 
 
+def save_json(path, data, ensure_ascii=False):
+    with open(path, "w", encoding="utf-8") as outfile:
+        json.dump(data, outfile, indent=4, ensure_ascii=ensure_ascii)
+
+
+def save_yaml(path, data):
+    with open(path, 'w', encoding="utf-8") as file:
+        yaml.dump(data, file, allow_unicode=True)
+
+
 def load_cfg(path):
     if path.endswith(".json"):
         return load_json(path)
     elif path.endswith(".yaml"):
         return load_yaml(path)
+    else:
+        raise Exception(f"Unsupported config format: {path}")
+
+
+def save_cfg(path, data):
+    if path.endswith(".json"):
+        save_json(path, data)
+    elif path.endswith(".yaml"):
+        save_yaml(path, data)
     else:
         raise Exception(f"Unsupported config format: {path}")
 
@@ -69,24 +88,26 @@ class CommandrArg(object):
 
 
 class Commandr(object):
-    def __init__(self, name, title=None, description=None):
+    def __init__(self, name, title=None, description=None, version=None):
         self.name = name
         self.title = title
         self.description = description
+        self.version = version
         self.args = []
-        self.parser = None
+        self.parser, self.parser_required, self.parser_optional = Commandr.prepare_cli_args()
 
     def to_dict(self):
-        # TODO add version and schemaversion
-        return dict(name=self.name, title=self.title, description=self.description, args=[a.to_dict() for a in self.args])
+        return dict(name=self.name, title=self.title, description=self.description, version=self.version, schema_version=self.schema_version(), args=[a.to_dict() for a in self.args])
+
+    def save(self, path):
+        save_cfg(path, self.to_dict())
 
     @staticmethod
-    def from_file(path):
+    def load(path):
         cfg = load_cfg(path)
-        c = Commandr()
+        c = Commandr(cfg["name"], title=cfg.get("title"), description=cfg.get("description"), version=cfg.get("version"))
         for arg in cfg["args"]:
             c.add_argument(arg["name"], arg["cli"], type=arg.get("type"), required=arg.get("required"), default=arg.get("default"), env=arg.get("env"), loadconfig=arg.get("loadconfig"), help=arg.get("help"), format=arg.get("format"))
-        c.build()
         return c
 
     def add_argument(self, name, cli, type=None, required=False, default=None, env=None, loadconfig=None, help=None, format=None):
@@ -94,24 +115,22 @@ class Commandr(object):
             raise Exception(f"{name}: Required args cannot have default values!")
         if type == "datetime" and (format is None):
             raise Exception(f"{name}: Datetime fields must have format specified!")
-        ca = CommandrArg(name, cli, type=type, required=required, default=default, env=env, loadconfig=loadconfig, help=help, format=format)
-        self.args.append(ca)
+        arg = CommandrArg(name, cli, type=type, required=required, default=default, env=env, loadconfig=loadconfig, help=help, format=format)
+        self.args.append(arg)
 
-    def schema_version():
+        # add to argparse...
+        cli = arg.cli.split("|")
+        type = arg.type or'str'
+        basictype = type_by_name(type)
+        target = self.parser_required if arg.required else self.parser_optional
+        if type == "switch":
+            target.add_argument(*cli, dest=arg.name, help=arg.help, action='store_true')
+        else:
+            target.add_argument(*cli, dest=arg.name, help=arg.help, type=basictype)
+
+
+    def schema_version(self):
         return "1.0"
-
-    def build(self):
-        self.parser, required, optional = Commandr.prepare_cli_args()
-        for arg in self.args:
-            cli = arg.cli.split("|")
-            type = arg.type or'str'
-            basictype = type_by_name(type)
-            target = required if arg.required else optional
-            if type == "switch":
-                target.add_argument(*cli, dest=arg.name, help=arg.help, action='store_true')
-            else:
-                target.add_argument(*cli, dest=arg.name, help=arg.help, type=basictype)
-        return self
 
     def parse(self, args=sys.argv[1:], verbose=False):
         args = self.parser.parse_args()

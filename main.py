@@ -11,15 +11,18 @@ if __name__ == "__main__":
 
     print("Starting Commandr...")
 
-    cmdr = Commandr("commandr-demo", title="Commandr Demo")
-    cmdr.add_argument("infile", "-i", type="str", required=True)
-    cmdr.add_argument("count", "-c|--count", type="int", default=12345, env="COMMANDR_COUNT")
-    cmdr.add_argument("config", "--config", default="config/config.yaml", loadconfig=True)
-    cmdr.add_argument("verbose", "-v|--verbose", type="switch", env="COMMANDR_VERBOSE")
-    cmdr.add_argument("mybool", "--mybool", type="bool")
-    cmdr.add_argument("date", "--date", type="datetime", format="%Y-%m-%d")
-    cmdr.build()
-
+    LOADFROMFILE = False
+    if LOADFROMFILE:
+        cmdr = Commandr.load("target/commandr-demo.cmdr.yaml")
+    else:
+        cmdr = Commandr("commandr-demo", title="Commandr Demo")
+        cmdr.add_argument("infile", "-i", type="str", required=True)
+        cmdr.add_argument("count", "-c|--count", type="int", default=12345, env="COMMANDR_COUNT")
+        cmdr.add_argument("config", "--config", default="config/config.yaml", loadconfig=True)
+        cmdr.add_argument("verbose", "-v|--verbose", type="switch", env="COMMANDR_VERBOSE")
+        cmdr.add_argument("mybool", "--mybool", type="bool")
+        cmdr.add_argument("date", "--date", type="datetime", format="%Y-%m-%d")
+ 
     args, configs = cmdr.parse()
 
     print("Args parsed:")
@@ -28,9 +31,4 @@ if __name__ == "__main__":
 
     print("Configs loaded:", configs)
 
-    SAVEFILE = False
-    if SAVEFILE:
-        dict = cmdr.to_dict()
-        json_doc = json.dumps(dict, indent=4)
-        with open("target/commandr-demo.cmdr.json", "w", encoding="utf-8") as outfile:
-            outfile.write(json_doc)
+    # cmdr.save("target/commandr-demo.cmdr.yaml")
