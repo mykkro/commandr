@@ -24,10 +24,16 @@ if __name__ == "__main__":
         cmdr.add_argument("date", "--date", type="datetime", format="%Y-%m-%d")
  
     args, configs = cmdr.parse()
-
     print("Args parsed:")
     for argname in args:
+        print(f"  {argname}: {args[argname]}") 
+    print()
+
+    args, configs = cmdr.parse(include_source=True)
+    print("Args parsed (incl sources):")
+    for argname in args:
         print(f"  ({args[argname]['source']}) {argname}: {args[argname]['value']}") 
+    print()
 
     print("Configs loaded:", configs)
 

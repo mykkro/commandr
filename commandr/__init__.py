@@ -95,7 +95,7 @@ class Commandr(object):
     def schema_version(self):
         return "1.0"
 
-    def parse(self, args=sys.argv[1:], verbose=False):
+    def parse(self, args=sys.argv[1:], verbose=False, include_source=False):
         args = self.parser.parse_args()
         args_dict = vars(args)
         out = {}
@@ -143,7 +143,11 @@ class Commandr(object):
 
             if verbose:
                 print(f"  source={source} value={used_value}")
-            out[name] = dict(source=source, value=used_value)
+
+            if include_source:
+                out[name] = dict(source=source, value=used_value)
+            else:
+                out[name] = used_value
 
         self.validate(out)
 
