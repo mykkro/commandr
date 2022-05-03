@@ -2,7 +2,7 @@ import os, argparse, sys
 import distutils.util
 import datetime
 
-from kommons import load_cfg
+from kommons import load_cfg, save_cfg
 
 
 def environ_or_required(key):

@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     print("Starting Commandr...")
 
-    LOADFROMFILE = False
+    LOADFROMFILE = True
     if LOADFROMFILE:
         cmdr = Commandr.load("target/commandr-demo.cmdr.yaml")
     else:
@@ -31,4 +31,4 @@ if __name__ == "__main__":
 
     print("Configs loaded:", configs)
 
-    # cmdr.save("target/commandr-demo.cmdr.yaml")
+    cmdr.save("target/commandr-demo.cmdr.yaml")
