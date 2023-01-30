@@ -26,11 +26,14 @@ else:
     cmdr = Commandr("commandr-demo", title="Commandr Demo")
     cmdr.add_argument("infile", "-i", type="str", required=True)
     cmdr.add_argument("count", "-c|--count", type="int", default=12345, env="COMMANDR_COUNT")
-    cmdr.add_argument("config", "--config", default="config/config.yaml", loadconfig=True)
+    cmdr.add_argument("config", "--config", default="config/config.yaml", loadconfig="-D")
     cmdr.add_argument("verbose", "-v|--verbose", type="switch", env="COMMANDR_VERBOSE")
     cmdr.add_argument("mybool", "--mybool", type="bool")
     cmdr.add_argument("date", "--date", type="datetime", format="%Y-%m-%d")
-
+    cmdr.add_argument("foo", "--foo", type="int", nargs="+")
+    cmdr.add_argument("bar", "--bar", type="str", nargs="*")
+    cmdr.add_argument("baz", "--baz", type="float", nargs=3)
+        
 args, configs = cmdr.parse()
 
 print("Args parsed:")
