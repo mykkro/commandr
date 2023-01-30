@@ -1,3 +1,5 @@
 dummy-option: 12345
 enable-logging: True
 void_option: null
+foo:
+  bar: "Hello!"

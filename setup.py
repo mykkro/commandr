@@ -26,7 +26,8 @@ setup(
     python_requires='>=3.8',
     install_requires = [
         'versiontag>=1.1.1',
-        'pyyaml'
+        'pyyaml',
+        'scalpl'
     ],
     package_data={'': ['requirements.txt', 'README.md']},
     include_package_data=True
