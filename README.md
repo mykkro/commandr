@@ -4,11 +4,29 @@ Basically, it is a small convenience wrapper around argparse with some useful bi
 
 * uses `argparse` for parsing CLI args
 * substitutes values from ENV vars if provided
-* can load multiple config files (JSON, YAML) into Python dicts
+* can load multiple config files (JSON, YAML) into Python dicts, with optional
+  `-Dkey=value` CLI overrides (dotted-key, via [scalpl](https://pypi.org/project/scalpl/))
+* supports `nargs` for multi-value arguments
+* can save/load its own schema as JSON/YAML, and auto-adds a `--saveconfig <path>`
+  flag to dump the current schema
 
 ## Install
 
-This library uses a tiny library [kommons](https://github.com/mykkro/kommons). You can install `kommons` and `commandr` via `python setup.py install`.
+This library depends on the sibling library [kommons](https://github.com/mykkro/kommons)
+(declared in `install_requires`), plus [PyYAML](https://pypi.org/project/PyYAML/) and
+[scalpl](https://pypi.org/project/scalpl/).
+
+```bash
+pip install git+https://github.com/mykkro/kommons.git
+pip install git+https://github.com/mykkro/commandr.git
+```
+
+Or, for local development (editable install, from clones of both repos):
+
+```bash
+pip install -e ../kommons
+pip install -e .
+```
 
 ## Basic Usage
 
@@ -46,7 +64,42 @@ print("Configs loaded:", configs)
 
 ```
 
+See [main.py](main.py) for a complete runnable example, including `-D` config
+overrides (e.g. `-Ddummy-option=int:67890 -Dfoo.bar="as df"`) and `nargs`.
+
+### Argument types
+
+| `type` | Notes |
+| --- | --- |
+| `str` (default) | Plain string. |
+| `int` / `float` | Cast via the matching Python builtin; CLI, ENV and default values are all coerced consistently. |
+| `bool` | Parsed from a string value (CLI/ENV) via `kommons.str_to_bool`. |
+| `switch` | A boolean flag (`action="store_true"`); absent means `False` unless `env` resolves it. |
+| `datetime` | Requires `format` (a `strptime`-compatible string). |
+
+### Value resolution order
+
+For every argument, `parse()` resolves the value in this order: **CLI flag** >
+**environment variable** (`env=...`) > **default** (`default=...`). If none of
+these provide a value and `required=True`, parsing prints help and exits (`sys.exit(1)`).
+
+## Development
+
+Install the test dependencies and run the test suite with [pytest](https://docs.pytest.org/):
+
+```bash
+pip install -e ../kommons
+pip install -e .
+pip install pytest
+pytest
+```
+
 ## TODO & Nice2Have
 
 * enhanced args validation
 * validate JSON/YAML docs against a schema
+
+## License
+
+MIT, see [LICENSE](LICENSE).
+

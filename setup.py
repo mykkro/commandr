@@ -27,8 +27,9 @@ setup(
     install_requires = [
         'versiontag>=1.1.1',
         'pyyaml',
-        'scalpl'
+        'scalpl',
+        'kommons'
     ],
-    package_data={'': ['requirements.txt', 'README.md']},
+    package_data={'': ['requirements.txt', 'README.md', 'LICENSE']},
     include_package_data=True
 )
